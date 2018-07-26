@@ -2,5 +2,7 @@
 <h1>Campgrounds page!</h1>
 <% campgrounds.forEach(function(campground){ %>
   <li><%= campground.name %></li>
+  <img src="<%= campground.image %>" alt="">
 <%  }) %>
+
 <% include partials/footer %>
