@@ -48,4 +48,7 @@ app.post("/campgrounds", function(req, res) {
 
 app.listen(3000, function() {
   console.log("Server is running");
+  setInterval(function(){
+    console.log("Server is running");
+  },5000);
 })
