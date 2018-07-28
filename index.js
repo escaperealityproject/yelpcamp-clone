@@ -1,19 +1,41 @@
 var express = require("express");
 var app = express();
 var bodyParser = require("body-parser");
-var campgrounds = [{
-    name: "Salmon Creek",
-    image: "https://invinciblengo.org/photos/event/slider/manali-girls-special-adventure-camp-himachal-pradesh-1xJtgtx-1440x810.jpg"
-  },
-  {
-    name: "Granite Hill",
-    image: "https://invinciblengo.org/photos/event/slider/mount-abu-trekking-camp-aravalli-hills-rajasthan-nbMgzbA-1440x810.jpg"
-  },
-  {
-    name: "Mountain Goat's Rest",
-    image: "https://adventures365.in/media/catalog/product/cache/1/thumbnail/9df78eab33525d08d6e5fb8d27136e95/c/a/camp-oak-view-bir-billing-4.jpg"
-  }
-];
+var mongoose = require("mongoose");
+
+mongoose.connect("mongodb://localhost/yelp_camp");
+
+var campgroundSchema = new mongoose.Schema({
+  name: String,
+  image: String
+});
+
+var Campground = mongoose.model("Campground", campgroundSchema);
+
+// Campground.create({
+//   name: "Mountain Goat's Rest",
+//   image: "https://adventures365.in/media/catalog/product/cache/1/thumbnail/9df78eab33525d08d6e5fb8d27136e95/c/a/camp-oak-view-bir-billing-4.jpg"
+// },function(err,campground){
+//     if(err){
+//       console.log("Error");
+//     }else{
+//       console.log(campground);
+//     }
+//   })
+//
+// var campgrounds = [{
+//     name: "Salmon Creek",
+//     image: "https://invinciblengo.org/photos/event/slider/manali-girls-special-adventure-camp-himachal-pradesh-1xJtgtx-1440x810.jpg"
+//   },
+//   {
+//     name: "Granite Hill",
+//     image: "https://invinciblengo.org/photos/event/slider/mount-abu-trekking-camp-aravalli-hills-rajasthan-nbMgzbA-1440x810.jpg"
+//   },
+//   {
+//     name: "Mountain Goat's Rest",
+//     image: "https://adventures365.in/media/catalog/product/cache/1/thumbnail/9df78eab33525d08d6e5fb8d27136e95/c/a/camp-oak-view-bir-billing-4.jpg"
+//   }
+// ];
 
 app.use(bodyParser.urlencoded({
   extended: true
@@ -26,9 +48,15 @@ app.get("/", function(req, res) {
 });
 
 app.get("/campgrounds", function(req, res) {
-  res.render("campgrounds", {
-    campgrounds: campgrounds
-  });
+  Campground.find({}, function(err, campgrounds) {
+    if (err) {
+      console.log("Error");
+    } else {
+      res.render("campgrounds", {
+        campgrounds: campgrounds
+      });
+    }
+  })
 });
 
 app.get("/campgrounds/new", function(req, res) {
@@ -42,13 +70,18 @@ app.post("/campgrounds", function(req, res) {
     name: name,
     image: image
   }
-  campgrounds.push(newCamp);
-  res.redirect('/campgrounds');
+  Campground.create(newCamp,function(err){
+    if(err){
+      console.log("Error");
+    }else{
+        res.redirect('/campgrounds');
+    }
+  });
 });
 
 app.listen(3000, function() {
   console.log("Server is running");
-  setInterval(function(){
+  setInterval(function() {
     console.log("Server is running");
-  },5000);
+  }, 5000);
 })
