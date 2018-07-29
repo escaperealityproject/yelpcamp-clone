@@ -7,21 +7,23 @@ mongoose.connect("mongodb://localhost/yelp_camp");
 
 var campgroundSchema = new mongoose.Schema({
   name: String,
-  image: String
+  image: String,
+  description: String
 });
 
 var Campground = mongoose.model("Campground", campgroundSchema);
 
 // Campground.create({
 //   name: "Mountain Goat's Rest",
-//   image: "https://adventures365.in/media/catalog/product/cache/1/thumbnail/9df78eab33525d08d6e5fb8d27136e95/c/a/camp-oak-view-bir-billing-4.jpg"
+//   image: "https://adventures365.in/media/catalog/product/cache/1/thumbnail/9df78eab33525d08d6e5fb8d27136e95/c/a/camp-oak-view-bir-billing-4.jpg",
+//   description:"Huge granite hill,no water/bathrooms"
 // },function(err,campground){
 //     if(err){
 //       console.log("Error");
 //     }else{
 //       console.log(campground);
 //     }
-//   })
+//   });
 //
 // var campgrounds = [{
 //     name: "Salmon Creek",
@@ -52,7 +54,7 @@ app.get("/campgrounds", function(req, res) {
     if (err) {
       console.log("Error");
     } else {
-      res.render("campgrounds", {
+      res.render("index", {
         campgrounds: campgrounds
       });
     }
@@ -66,18 +68,32 @@ app.get("/campgrounds/new", function(req, res) {
 app.post("/campgrounds", function(req, res) {
   var name = req.body.name;
   var image = req.body.image;
+  var description = req.body.description;
   var newCamp = {
     name: name,
-    image: image
+    image: image,
+    description: description
   }
-  Campground.create(newCamp,function(err){
-    if(err){
+  Campground.create(newCamp, function(err) {
+    if (err) {
       console.log("Error");
-    }else{
-        res.redirect('/campgrounds');
+    } else {
+      res.redirect('/campgrounds');
     }
   });
 });
+
+app.get("/campgrounds/:id", function(req, res) {
+  Campground.findById(req.params.id, function(err, foundCamp) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.render("show", {
+        campground: foundCamp
+      });
+    }
+  })
+})
 
 app.listen(3000, function() {
   console.log("Server is running");
