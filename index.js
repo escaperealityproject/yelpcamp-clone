@@ -3,6 +3,7 @@ var app = express();
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var Campground = require("./models/campground");
+var Comment = require("./models/comment");
 var seedDB = require("./seeds");
 
 mongoose.connect("mongodb://localhost/yelp_camp");
@@ -26,7 +27,7 @@ app.get("/campgrounds", function(req, res) {
     if (err) {
       console.log("Error");
     } else {
-      res.render("index", {
+      res.render("campgrounds/index", {
         campgrounds: campgrounds
       });
     }
@@ -34,7 +35,7 @@ app.get("/campgrounds", function(req, res) {
 });
 
 app.get("/campgrounds/new", function(req, res) {
-  res.render("new");
+  res.render("campgrounds/new");
 })
 
 //CREATE - NEW CAMPGROUNDS
@@ -60,13 +61,47 @@ app.post("/campgrounds", function(req, res) {
 //SHOW - show more info
 
 app.get("/campgrounds/:id", function(req, res) {
-  Campground.findById(req.params.id).populate("comments").exec( function(err, foundCamp) {
-    console.log(foundCamp);
+  Campground.findById(req.params.id).populate("comments").exec(function(err, foundCamp) {
+    // console.log(foundCamp);
     if (err) {
       console.log(err);
     } else {
-      res.render("show", {
+      res.render("campgrounds/show", {
         campground: foundCamp
+      });
+    }
+  })
+})
+
+//===============================
+//COMMENTS ROUTES
+//===============================
+
+app.get("/campgrounds/:id/comments/new", function(req, res) {
+  Campground.findById(req.params.id, function(err, campground) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.render("comments/new", {
+        campground: campground
+      });
+    }
+  })
+})
+
+app.post("/campgrounds/:id/comments", function(req, res) {
+  Campground.findById(req.params.id, function(err, campground) {
+    if (err) {
+      console.log(err)
+    } else {
+      Comment.create(req.body.comment,function(err, comment) {
+         if (err) {
+          console.log(err)
+        } else {
+          campground.comments.push(comment);
+          campground.save();
+          res.redirect("/campgrounds/" + campground._id)
+        }
       });
     }
   })
@@ -78,29 +113,3 @@ app.listen(3000, function() {
     console.log("Server is running");
   }, 5000);
 })
-
-// Campground.create({
-//   name: "Mountain Goat's Rest",
-//   image: "https://adventures365.in/media/catalog/product/cache/1/thumbnail/9df78eab33525d08d6e5fb8d27136e95/c/a/camp-oak-view-bir-billing-4.jpg",
-//   description:"Huge granite hill,no water/bathrooms"
-// },function(err,campground){
-//     if(err){
-//       console.log("Error");
-//     }else{
-//       console.log(campground);
-//     }
-//   });
-//
-// var campgrounds = [{
-//     name: "Salmon Creek",
-//     image: "https://invinciblengo.org/photos/event/slider/manali-girls-special-adventure-camp-himachal-pradesh-1xJtgtx-1440x810.jpg"
-//   },
-//   {
-//     name: "Granite Hill",
-//     image: "https://invinciblengo.org/photos/event/slider/mount-abu-trekking-camp-aravalli-hills-rajasthan-nbMgzbA-1440x810.jpg"
-//   },
-//   {
-//     name: "Mountain Goat's Rest",
-//     image: "https://adventures365.in/media/catalog/product/cache/1/thumbnail/9df78eab33525d08d6e5fb8d27136e95/c/a/camp-oak-view-bir-billing-4.jpg"
-//   }
-// ];
