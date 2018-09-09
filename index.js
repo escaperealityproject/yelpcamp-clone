@@ -16,7 +16,7 @@ var indexRoutes = require("./routes/index");
 
 mongoose.connect("mongodb://localhost/yelp_camp");
 
-seedDB();
+// seedDB();
 
 app.use(bodyParser.urlencoded({
     extended: true
